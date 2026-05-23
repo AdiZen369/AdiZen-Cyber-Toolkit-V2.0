@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdiZenWorks Cybersecurity Toolkit V2.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --burgundy: #6d0a1b;
+  --crimson: #cc0000;
+  --crimson-bright: #ff2222;
+  --crimson-dim: #8b0000;
+  --dark: #080808;
+  --dark2: #0f0f0f;
+  --dark3: #161616;
+  --pearl: #e8e4dc;
+  --pearl-dim: rgba(232,228,220,0.6);
+  --glass-border: rgba(180,0,0,0.25);
+  --text: #e8e4dc;
+  --text-muted: #887878;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+#bg-canvas {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  z-index:0; pointer-events:none;
+}
+
+.circuit-overlay {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  z-index:1; pointer-events:none;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(180,0,0,0.8) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180,0,0,0.8) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.wrapper {
+  position: relative; z-index:10;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* ── HEADER ── */
+.hero {
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  padding: 52px 0 36px;
+  text-align: center;
+}
+
+.hero-logo-wrap {
+  width: 100px; height: 100px;
+  margin-bottom: 18px;
+  filter: drop-shadow(0 0 28px rgba(180,0,0,0.7));
+  animation: float 4s ease-in-out infinite, pulse-logo 3s ease-in-out infinite alternate;
+}
+
+.hero-logo-wrap img { width:100%; height:100%; object-fit:contain; }
+
+@keyframes float {
+  0%,100% { transform: translateY(0) rotateY(0deg); }
+  50%      { transform: translateY(-8px) rotateY(6deg); }
+}
+@keyframes pulse-logo {
+  0%   { filter: drop-shadow(0 0 28px rgba(180,0,0,0.7)); }
+  100% { filter: drop-shadow(0 0 42px rgba(200,0,0,1)); }
+}
+
+.hero-eyebrow {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--pearl) 30%, var(--crimson) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.hero-tagline {
+  font-size: 0.95rem;
+  color: var(--crimson-bright);
+  text-shadow: 0 0 10px rgba(200,0,0,0.5);
+  font-style: italic;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width:100%; height:1px;
+  background: linear-gradient(90deg, transparent, var(--crimson), var(--crimson-bright), var(--crimson), transparent);
+  margin: 28px 0;
+  box-shadow: 0 0 10px rgba(200,0,0,0.4);
+}
+
+/* ── KPI ROW ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background: linear-gradient(145deg, rgba(22,10,10,0.95), rgba(10,5,5,0.98));
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content:'';
+  position: absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--crimson), transparent);
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--crimson-bright);
+  text-shadow: 0 0 14px rgba(200,0,0,0.5);
+  line-height: 1;
+}
+
+.kpi-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+
+.section-label .icon {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--crimson);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  background: rgba(180,0,0,0.08);
+  box-shadow: 0 0 10px rgba(180,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.section-label h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+/* ── GLASS CARD ── */
+.card {
+  background: linear-gradient(145deg, rgba(20,8,8,0.96), rgba(10,4,4,0.98));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: box-shadow 0.3s, border-color 0.3s;
+  margin-bottom: 24px;
+}
+
+.card::before {
+  content:'';
+  position: absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(180,0,0,0.5), transparent);
+}
+
+.card:hover {
+  border-color: rgba(200,0,0,0.45);
+  box-shadow: 0 0 36px rgba(180,0,0,0.1), 0 20px 50px rgba(0,0,0,0.5);
+}
+
+/* corner accents */
+.cc { position: absolute; width:10px; height:10px; border-color:var(--crimson); opacity:0.6; }
+.cc.tl { top:8px; left:8px;   border-top:2px solid; border-left:2px solid; border-radius:3px 0 0 0; }
+.cc.tr { top:8px; right:8px;  border-top:2px solid; border-right:2px solid; border-radius:0 3px 0 0; }
+.cc.bl { bottom:8px; left:8px; border-bottom:2px solid; border-left:2px solid; border-radius:0 0 0 3px; }
+.cc.br { bottom:8px; right:8px; border-bottom:2px solid; border-right:2px solid; border-radius:0 0 3px 0; }
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  display: flex; gap:8px; flex-wrap:wrap;
+  margin-bottom: 24px;
+}
+
+.nav-tab {
+  padding: 9px 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  font-size: 0.8rem; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; color: var(--text-muted);
+  background: rgba(255,255,255,0.03);
+  transition: all 0.2s;
+}
+
+.nav-tab:hover { border-color:var(--crimson); color:var(--text); }
+
+.nav-tab.active {
+  background: rgba(180,0,0,0.15);
+  border-color: var(--crimson);
+  color: var(--pearl);
+  box-shadow: 0 0 12px rgba(180,0,0,0.2);
+}
+
+/* ── TOOL PANELS ── */
+.tool-panel { display:none; }
+.tool-panel.active { display:block; }
+
+/* ── FORM ── */
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+
+.form-group label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--crimson);
+  box-shadow: 0 0 0 2px rgba(180,0,0,0.12), 0 0 10px rgba(180,0,0,0.1);
+}
+
+select option { background: #1a0808; }
+textarea { resize: vertical; min-height: 70px; }
+
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+@media(max-width:700px) { .grid-2,.grid-3,.kpi-row { grid-template-columns:1fr; } }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--burgundy), var(--crimson));
+  border: none; border-radius: 9px;
+  padding: 12px 28px;
+  color: var(--pearl); font-size: 0.88rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(180,0,0,0.35);
+  transition: all 0.25s;
+  position: relative; overflow: hidden;
+}
+
+.btn-primary::before {
+  content:'';
+  position: absolute; top:-50%; left:-60%;
+  width:60%; height:200%;
+  background: rgba(255,255,255,0.1);
+  transform: skewX(-25deg);
+  transition: left 0.4s;
+}
+
+.btn-primary:hover::before { left:130%; }
+.btn-primary:hover {
+  box-shadow: 0 6px 26px rgba(200,0,0,0.5), 0 0 28px rgba(180,0,0,0.3);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1.5px solid rgba(180,0,0,0.4);
+  border-radius: 9px; padding: 10px 22px;
+  color: var(--text); font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: all 0.25s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--crimson-bright);
+  background: rgba(180,0,0,0.07);
+  box-shadow: 0 0 12px rgba(180,0,0,0.15);
+}
+
+.btn-row { display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap; }
+
+/* ── RESULTS ── */
+.results-box {
+  background: #050505;
+  border: 1px solid rgba(180,0,0,0.12);
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  color: #777;
+  min-height: 120px;
+  max-height: 320px;
+  overflow-y: auto;
+  line-height: 1.7;
+  margin-top: 14px;
+  white-space: pre-wrap;
+}
+
+.results-box .ok   { color: #00cc55; }
+.results-box .err  { color: var(--crimson); }
+.results-box .warn { color: #cc8800; }
+.results-box .info { color: #4488ff; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: rgba(180,0,0,0.3); border-radius: 3px; }
+
+/* ── STATUS PILL ── */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.5px;
+}
+.status-pill .dot { width:6px; height:6px; border-radius:50%; }
+.status-pill.idle  { background:rgba(100,100,100,0.15); color:#888; border:1px solid #333; }
+.status-pill.idle .dot { background:#555; }
+.status-pill.running { background:rgba(0,200,80,0.1); color:#00cc55; border:1px solid rgba(0,200,80,0.3); }
+.status-pill.running .dot { background:#00cc55; animation:pdot 1s ease-in-out infinite; }
+.status-pill.error  { background:rgba(200,0,0,0.1); color:var(--crimson-bright); border:1px solid rgba(200,0,0,0.3); }
+.status-pill.error .dot { background:var(--crimson); }
+@keyframes pdot { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── BYOK SECTION ── */
+.byok-card {
+  background: linear-gradient(145deg, rgba(30,8,8,0.97), rgba(12,4,4,0.99));
+  border: 1px solid rgba(180,0,0,0.3);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.byok-card::before {
+  content:'';
+  position: absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--crimson-bright), var(--crimson), transparent);
+  box-shadow: 0 0 12px rgba(200,0,0,0.5);
+}
+
+.byok-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--crimson-bright);
+  text-shadow: 0 0 8px rgba(200,0,0,0.4);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.provider-chips {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 16px;
+}
+
+.provider-chip {
+  padding: 7px 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; letter-spacing: 0.5px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.provider-chip:hover { border-color:var(--crimson); color:var(--text); }
+
+.provider-chip.active {
+  background: rgba(180,0,0,0.15);
+  border-color: var(--crimson);
+  color: var(--pearl);
+  box-shadow: 0 0 10px rgba(180,0,0,0.2);
+  text-shadow: 0 0 6px rgba(180,0,0,0.3);
+}
+
+.api-key-row { display:flex; gap:8px; }
+.api-key-row input {
+  flex:1; font-family:'Courier New', monospace; font-size:0.82rem;
+}
+
+.btn-icon {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  cursor: pointer; font-size: 14px;
+  transition: all 0.2s;
+}
+.btn-icon:hover { border-color:var(--crimson); color:var(--crimson-bright); }
+
+.byok-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(180,0,0,0.12);
+  border: 1px solid rgba(180,0,0,0.35);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  color: var(--crimson-bright);
+  text-transform: uppercase;
+  margin-left: auto;
+}
+
+.key-status {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.key-status.ok-status { color: #00cc55; }
+
+/* ── LOG ── */
+.log-area {
+  background: #050505;
+  border: 1px solid rgba(180,0,0,0.12);
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.76rem;
+  color: #555;
+  min-height: 100px; max-height: 200px;
+  overflow-y: auto; line-height: 1.8;
+}
+
+.log-line { display:flex; gap:10px; }
+.log-area .ts  { color:#333; }
+.log-area .ok  { color:#00cc55; }
+.log-area .err { color:var(--crimson); }
+.log-area .info{ color:#4488ff; }
+.log-area .warn{ color:#cc8800; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align:center; margin-top:44px;
+  font-size:0.7rem; color:#333;
+  letter-spacing:2px; text-transform:uppercase;
+}
+.footer span { color:var(--crimson-dim); }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="circuit-overlay"></div>
+
+<div class="wrapper">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-logo-wrap">
+      <img src="{{ url_for('static', filename='assets/logo.png') }}"
+           onerror="this.style.display='none'"
+           alt="AdiZenWorks">
+    </div>
+    <div class="hero-eyebrow">AdiZenWorks Inc. — Cybersecurity Toolkit</div>
+    <h1>Command Center V2.0</h1>
+    <div class="hero-tagline">Securing Your Digital Future</div>
+  </div>
+
+  <!-- ── KPIs ── -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-value" id="stat-scans">0</div>
+      <div class="kpi-label">Total Scans</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="stat-vulns">0</div>
+      <div class="kpi-label">Vulnerabilities</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="stat-score">--</div>
+      <div class="kpi-label">Security Score</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="stat-alerts">0</div>
+      <div class="kpi-label">Critical Alerts</div>
+    </div>
+  </div>
+
+  <!-- ── BYOK — AI PROVIDER CONFIG ── -->
+  <div class="byok-card">
+    <div class="cc tl"></div><div class="cc tr"></div>
+    <div class="cc bl"></div><div class="cc br"></div>
+
+    <div class="byok-title">
+      🤖 AI Assistant — Bring Your Own Key
+      <span class="byok-badge">BYOK</span>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:14px;">
+      <div class="form-group">
+        <label>Provider</label>
+        <select id="ai-provider" onchange="updateProviderDefaults()">
+          <option value="google">Google Gemini</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic Claude</option>
+          <option value="mistral">Mistral AI</option>
+          <option value="groq">Groq</option>
+          <option value="ollama">Ollama (Local)</option>
+          <option value="custom">Custom / Self-hosted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Model</label>
+        <input type="text" id="ai-model" placeholder="e.g. gemini-1.5-pro">
+      </div>
+      <div class="form-group">
+        <label>Base URL <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+        <input type="text" id="ai-base-url" placeholder="https://api.openai.com/v1">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>API Key</label>
+      <div class="api-key-row">
+        <input type="password" id="ai-api-key" placeholder="Paste your API key here — stored locally, never sent to our servers">
+        <button class="btn-icon" title="Show/Hide" onclick="toggleKeyVisibility()">👁</button>
+        <button class="btn-icon" title="Test Connection" onclick="testAIConnection()">⚡</button>
+        <button class="btn-icon" title="Clear" onclick="clearAPIKey()">✕</button>
+      </div>
+      <div class="key-status" id="key-status">🔑 No key configured — AI assistant features disabled</div>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+      <button class="btn-primary" style="padding:9px 20px; font-size:0.78rem;" onclick="saveAIConfig()">💾 Save Config</button>
+      <span style="font-size:0.7rem; color:var(--text-muted);">Stored in browser localStorage — not transmitted</span>
+    </div>
+  </div>
+
+  <!-- ── TOOL NAVIGATION ── -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showTool('ports')">🔌 Port Scanner</div>
+    <div class="nav-tab" onclick="showTool('headers')">🛡 Header Check</div>
+    <div class="nav-tab" onclick="showTool('hash')">🔐 Hash Gen</div>
+    <div class="nav-tab" onclick="showTool('xss')">💥 XSS Scanner</div>
+    <div class="nav-tab" onclick="showTool('sqli')">💉 SQLi Scanner</div>
+    <div class="nav-tab" onclick="showTool('mapper')">🗺 Net Mapper</div>
+    <div class="nav-tab" onclick="showTool('spider')">🕷 Web Spider</div>
+    <div class="nav-tab" onclick="showTool('dns')">🌐 DNS Lookup</div>
+    <div class="nav-tab" onclick="showTool('ssl')">🔒 SSL Inspector</div>
+    <div class="nav-tab" onclick="showTool('password')">🔑 Password</div>
+    <div class="nav-tab" onclick="showTool('subdomain')">🔎 Subdomains</div>
+    <div class="nav-tab" onclick="showTool('cve')">📋 CVE Search</div>
+    <div class="nav-tab" onclick="showTool('revshell')">💻 Shell Detect</div>
+    <div class="nav-tab" onclick="showTool('security')">🛡️ Sec Audit</div>
+    <div class="nav-tab" onclick="showTool('ai')">🤖 AI Analyst</div>
+  </div>
+
+  <!-- ── PORT SCANNER ── -->
+  <div class="card tool-panel active" id="tool-ports">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🔌</div>
+      <h2>Port Scanner</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-ports"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Target Host / IP</label>
+        <input type="text" id="ports-target" placeholder="192.168.1.1 or example.com">
+      </div>
+      <div class="form-group">
+        <label>Port Range</label>
+        <input type="text" id="ports-range" placeholder="1-1000" value="1-1000">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runPortScan()">⚡ Start Scan</button>
+      <button class="btn-secondary" onclick="clearResult('ports')">Clear</button>
+    </div>
+    <div class="results-box" id="result-ports">// Results will appear here...</div>
+  </div>
+
+  <!-- ── HEADER CHECK ── -->
+  <div class="card tool-panel" id="tool-headers">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🛡</div>
+      <h2>Security Headers</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-headers"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Target URL</label>
+      <input type="text" id="headers-url" placeholder="https://example.com">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runHeaderCheck()">⚡ Inspect Headers</button>
+      <button class="btn-secondary" onclick="clearResult('headers')">Clear</button>
+    </div>
+    <div class="results-box" id="result-headers">// Results will appear here...</div>
+  </div>
+
+  <!-- ── HASH GEN ── -->
+  <div class="card tool-panel" id="tool-hash">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🔐</div>
+      <h2>Hash Generator</h2>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Input Text</label>
+        <textarea id="hash-text" placeholder="Enter text to hash..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Algorithm</label>
+        <select id="hash-algo">
+          <option value="sha256">SHA-256</option>
+          <option value="sha512">SHA-512</option>
+          <option value="sha1">SHA-1</option>
+          <option value="md5">MD5</option>
+          <option value="sha3_256">SHA3-256</option>
+          <option value="blake2b">BLAKE2b</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runHash()">⚡ Generate Hash</button>
+      <button class="btn-secondary" onclick="clearResult('hash')">Clear</button>
+    </div>
+    <div class="results-box" id="result-hash">// Results will appear here...</div>
+  </div>
+
+  <!-- ── XSS SCANNER ── -->
+  <div class="card tool-panel" id="tool-xss">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">💥</div>
+      <h2>XSS Scanner</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-xss"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Target URL</label>
+      <input type="text" id="xss-url" placeholder="https://target.com/search?q=test">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runXSS()">⚡ Scan for XSS</button>
+      <button class="btn-secondary" onclick="clearResult('xss')">Clear</button>
+    </div>
+    <div class="results-box" id="result-xss">// Results will appear here...</div>
+  </div>
+
+  <!-- ── SQLI SCANNER ── -->
+  <div class="card tool-panel" id="tool-sqli">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">💉</div>
+      <h2>SQL Injection Scanner</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-sqli"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Target URL</label>
+      <input type="text" id="sqli-url" placeholder="https://target.com/login?id=1">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runSQLi()">⚡ Scan for SQLi</button>
+      <button class="btn-secondary" onclick="clearResult('sqli')">Clear</button>
+    </div>
+    <div class="results-box" id="result-sqli">// Results will appear here...</div>
+  </div>
+
+  <!-- ── NETWORK MAPPER ── -->
+  <div class="card tool-panel" id="tool-mapper">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🗺</div>
+      <h2>Network Mapper</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-mapper"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Target Network / Host</label>
+      <input type="text" id="mapper-target" placeholder="192.168.1.0/24 or hostname">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runMapper()">⚡ Map Network</button>
+      <button class="btn-secondary" onclick="clearResult('mapper')">Clear</button>
+    </div>
+    <div class="results-box" id="result-mapper">// Results will appear here...</div>
+  </div>
+
+  <!-- ── WEB SPIDER ── -->
+  <div class="card tool-panel" id="tool-spider">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🕷</div>
+      <h2>Web Spider</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-spider"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Target URL</label>
+        <input type="text" id="spider-url" placeholder="https://example.com">
+      </div>
+      <div class="form-group">
+        <label>Crawl Depth</label>
+        <input type="number" id="spider-depth" value="2" min="1" max="5">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runSpider()">⚡ Start Spider</button>
+      <button class="btn-secondary" onclick="clearResult('spider')">Clear</button>
+    </div>
+    <div class="results-box" id="result-spider">// Results will appear here...</div>
+  </div>
+
+  <!-- ── DNS LOOKUP ── -->
+  <div class="card tool-panel" id="tool-dns">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🌐</div>
+      <h2>DNS Lookup</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-dns"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Domain</label>
+      <input type="text" id="dns-domain" placeholder="example.com">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runDNS()">⚡ Lookup DNS</button>
+      <button class="btn-secondary" onclick="clearResult('dns')">Clear</button>
+    </div>
+    <div class="results-box" id="result-dns">// Results will appear here...</div>
+  </div>
+
+  <!-- ── SSL INSPECTOR ── -->
+  <div class="card tool-panel" id="tool-ssl">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🔒</div>
+      <h2>SSL / TLS Inspector</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-ssl"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Hostname</label>
+        <input type="text" id="ssl-hostname" placeholder="example.com">
+      </div>
+      <div class="form-group">
+        <label>Port</label>
+        <input type="number" id="ssl-port" value="443" min="1" max="65535">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runSSL()">⚡ Inspect SSL</button>
+      <button class="btn-secondary" onclick="clearResult('ssl')">Clear</button>
+    </div>
+    <div class="results-box" id="result-ssl">// Results will appear here...</div>
+  </div>
+
+  <!-- ── PASSWORD STRENGTH ── -->
+  <div class="card tool-panel" id="tool-password">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🔑</div>
+      <h2>Password Strength Analyzer</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-password"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Password to Analyze</label>
+      <input type="text" id="password-input" placeholder="Enter password to test strength...">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runPassword()">⚡ Analyze</button>
+      <button class="btn-secondary" onclick="clearResult('password')">Clear</button>
+    </div>
+    <div class="results-box" id="result-password">// Results will appear here...</div>
+  </div>
+
+  <!-- ── SUBDOMAIN ENUMERATOR ── -->
+  <div class="card tool-panel" id="tool-subdomain">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🔎</div>
+      <h2>Subdomain Enumerator</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-subdomain"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="form-group">
+      <label>Target Domain</label>
+      <input type="text" id="subdomain-domain" placeholder="example.com">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runSubdomain()">⚡ Enumerate</button>
+      <button class="btn-secondary" onclick="clearResult('subdomain')">Clear</button>
+    </div>
+    <div class="results-box" id="result-subdomain">// Results will appear here...</div>
+  </div>
+
+  <!-- ── CVE SEARCH ── -->
+  <div class="card tool-panel" id="tool-cve">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">📋</div>
+      <h2>CVE Search</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-cve"><span class="dot"></span> Ready</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Search Query</label>
+        <input type="text" id="cve-query" placeholder="e.g. Apache Log4j, CVE-2021-44228">
+      </div>
+      <div class="form-group">
+        <label>Max Results</label>
+        <input type="number" id="cve-max" value="10" min="1" max="50">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runCVE()">⚡ Search CVEs</button>
+      <button class="btn-secondary" onclick="clearResult('cve')">Clear</button>
+    </div>
+    <div class="results-box" id="result-cve">// Results will appear here...</div>
+  </div>
+
+  <!-- ── REVERSE SHELL DETECTOR ── -->
+  <div class="card tool-panel" id="tool-revshell">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">💻</div>
+      <h2>Reverse Shell Detector</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-revshell"><span class="dot"></span> Ready</span></div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+      Paste code, script content, or any text to scan for reverse shell / webshell signatures (54 patterns).
+    </p>
+    <div class="form-group">
+      <label>Code / Text to Scan</label>
+      <textarea id="revshell-text" style="min-height:120px;" placeholder="# Paste code here to scan for reverse shells, webshells, or malicious payloads"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runRevShell()">⚡ Scan for Shells</button>
+      <button class="btn-secondary" onclick="clearResult('revshell')">Clear</button>
+    </div>
+    <div class="results-box" id="result-revshell">// Results will appear here...</div>
+  </div>
+
+  <!-- ── SECURITY AUDIT ── -->
+  <div class="card tool-panel" id="tool-security">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🛡️</div>
+      <h2>Security Audit</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-security"><span class="dot"></span> Ready</span></div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+      Run a comprehensive security audit — checks headers, SSL, cookies, server config, and more.
+    </p>
+    <div class="form-group">
+      <label>Target URL</label>
+      <input type="text" id="security-url" placeholder="https://example.com">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runSecurityAudit()">⚡ Run Audit</button>
+      <button class="btn-secondary" onclick="clearResult('security')">Clear</button>
+    </div>
+    <div class="results-box" id="result-security">// Results will appear here...</div>
+  </div>
+
+  <!-- ── AI ANALYST ── -->
+  <div class="card tool-panel" id="tool-ai">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label">
+      <div class="icon">🤖</div>
+      <h2>AI Security Analyst</h2>
+      <div style="margin-left:auto;"><span class="status-pill idle" id="status-ai"><span class="dot"></span> Ready</span></div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+      Ask the AI to analyze scan results, explain vulnerabilities, or suggest remediation steps.
+      Configure your provider and API key in the BYOK section above.
+    </p>
+    <div class="form-group">
+      <label>Prompt / Question</label>
+      <textarea id="ai-prompt" style="min-height:100px;" placeholder="e.g. Analyze these scan results and identify the highest risk vulnerabilities..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Context (paste scan results here)</label>
+      <textarea id="ai-context" style="min-height:80px;" placeholder="Paste scan output for analysis..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runAI()">⚡ Analyze</button>
+      <button class="btn-secondary" onclick="clearResult('ai')">Clear</button>
+    </div>
+    <div class="results-box" id="result-ai">// AI analysis will appear here...</div>
+  </div>
+
+  <!-- ── ACTIVITY LOG ── -->
+  <div class="card">
+    <div class="cc tl"></div><div class="cc br"></div>
+    <div class="section-label" style="margin-bottom:12px;">
+      <div class="icon">🖥</div>
+      <h2>Activity Log</h2>
+      <div style="margin-left:auto;">
+        <button class="btn-secondary" style="padding:6px 14px; font-size:0.72rem;" onclick="clearLog()">Clear Log</button>
+      </div>
+    </div>
+    <div class="log-area" id="log-area">
+      <div class="log-line"><span class="ts">[SYSTEM]</span><span class="info"> AdiZenWorks Command Center initialized</span></div>
+      <div class="log-line"><span class="ts">[SYSTEM]</span><span class="ok"> UI ready — awaiting operator commands</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p><span>AdiZenWorks Inc.</span> © 2026 — All systems operational</p>
+    <p style="margin-top:4px;">Built by Adi Zen · Boston, MA</p>
+  </div>
+
+</div>
+
+<!-- ── THREE.JS BACKGROUND ── -->
+<script>
+const canvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 80;
+
+const particleCount = 1600;
+const positions = new Float32Array(particleCount*3);
+const colors = new Float32Array(particleCount*3);
+
+for(let i=0;i<particleCount;i++){
+  positions[i*3]   = (Math.random()-0.5)*280;
+  positions[i*3+1] = (Math.random()-0.5)*190;
+  positions[i*3+2] = (Math.random()-0.5)*90 - 20;
+  const t = Math.random();
+  colors[i*3]   = 0.35 + t*0.5;
+  colors[i*3+1] = 0;
+  colors[i*3+2] = 0;
+}
+
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+pGeo.setAttribute('color',    new THREE.BufferAttribute(colors,3));
+const pMat = new THREE.PointsMaterial({size:0.45, vertexColors:true, transparent:true, opacity:0.5});
+const particles = new THREE.Points(pGeo, pMat);
+scene.add(particles);
+
+const grid = new THREE.GridHelper(200,40,0x220000,0x110000);
+grid.position.y = -60; grid.rotation.x = 0.15;
+scene.add(grid);
+
+let mx=0, my=0;
+document.addEventListener('mousemove', e=>{
+  mx = (e.clientX/window.innerWidth-0.5)*2;
+  my = (e.clientY/window.innerHeight-0.5)*2;
+});
+
+let t=0;
+function animate(){
+  requestAnimationFrame(animate); t+=0.003;
+  particles.rotation.y = t*0.04 + mx*0.04;
+  particles.rotation.x = my*0.03;
+  grid.position.z = -20 + Math.sin(t*0.3)*5;
+  camera.position.x += (mx*3 - camera.position.x)*0.04;
+  camera.position.y += (-my*2 - camera.position.y)*0.04;
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+</script>
+
+<script>
+// ── APP LOGIC ─────────────────────────────────────────────────
+
+let scanStats = { scans:0, vulns:0, alerts:0 };
+
+function log(msg, type='info'){
+  const area = document.getElementById('log-area');
+  const now = new Date().toLocaleTimeString('en-US',{hour12:false});
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = `<span class="ts">[${now}]</span><span class="${type}"> ${msg}</span>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function clearLog(){ document.getElementById('log-area').innerHTML=''; log('Log cleared'); }
+
+function showTool(id){
+  document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tool-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function setStatus(id, state){
+  const el = document.getElementById('status-'+id);
+  if(!el) return;
+  el.className = 'status-pill '+state;
+  el.innerHTML = `<span class="dot"></span> ${state==='running'?'Scanning...':state==='error'?'Error':'Ready'}`;
+}
+
+function clearResult(id){ document.getElementById('result-'+id).textContent='// Results will appear here...'; }
+
+function updateStats(){
+  document.getElementById('stat-scans').textContent = scanStats.scans;
+  document.getElementById('stat-vulns').textContent = scanStats.vulns;
+  document.getElementById('stat-alerts').textContent = scanStats.alerts;
+  if(scanStats.scans>0){
+    const score = Math.max(0, 100 - (scanStats.vulns*8) - (scanStats.alerts*20));
+    document.getElementById('stat-score').textContent = score+'%';
+  }
+}
+
+function displayResult(id, data){
+  const box = document.getElementById('result-'+id);
+  box.innerHTML = '';
+  const json = JSON.stringify(data, null, 2);
+  const colored = json
+    .replace(/"(error|Error)":/g, '<span class="err">"error":</span>')
+    .replace(/"(ok|success|True)":\s*true/g, '<span class="ok">"ok": true</span>')
+    .replace(/"(vulnerabilities)":/g, '<span class="warn">"vulnerabilities":</span>');
+  box.innerHTML = colored;
+}
+
+// ── PORT SCAN ──
+async function runPortScan(){
+  const target = document.getElementById('ports-target').value.trim();
+  const range  = document.getElementById('ports-range').value.trim();
+  if(!target){ alert('Enter a target host.'); return; }
+  setStatus('ports','running');
+  log(`Port scan started: ${target} [${range}]`);
+  try {
+    const r = await fetch('/api/port-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target,ports:range})});
+    const data = await r.json();
+    displayResult('ports', data);
+    setStatus('ports','idle');
+    scanStats.scans++;
+    if(data.open_ports) log(`Found ${data.open_ports.length} open ports on ${target}`,'ok');
+    updateStats();
+  } catch(e){ setStatus('ports','error'); log('Port scan error: '+e,'err'); }
+}
+
+// ── HEADER CHECK ──
+async function runHeaderCheck(){
+  const url = document.getElementById('headers-url').value.trim();
+  if(!url){ alert('Enter a URL.'); return; }
+  setStatus('headers','running');
+  log(`Header check: ${url}`);
+  try {
+    const r = await fetch('/api/check-headers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+    const data = await r.json();
+    displayResult('headers', data);
+    setStatus('headers','idle');
+    scanStats.scans++;
+    updateStats();
+    log(`Header inspection complete for ${url}`,'ok');
+  } catch(e){ setStatus('headers','error'); log('Header check error: '+e,'err'); }
+}
+
+// ── HASH GEN ──
+async function runHash(){
+  const text = document.getElementById('hash-text').value;
+  const algo = document.getElementById('hash-algo').value;
+  if(!text){ alert('Enter text to hash.'); return; }
+  try {
+    const r = await fetch('/api/generate-hash',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,algorithm:algo})});
+    const data = await r.json();
+    displayResult('hash', data);
+    log(`Hash generated [${algo.toUpperCase()}]`,'ok');
+  } catch(e){ log('Hash error: '+e,'err'); }
+}
+
+// ── XSS ──
+async function runXSS(){
+  const url = document.getElementById('xss-url').value.trim();
+  if(!url){ alert('Enter a URL.'); return; }
+  setStatus('xss','running');
+  log(`XSS scan started: ${url}`);
+  try {
+    const r = await fetch('/api/xss-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+    const data = await r.json();
+    displayResult('xss', data);
+    setStatus('xss','idle');
+    scanStats.scans++;
+    const vulnCount = data.vulnerabilities ? data.vulnerabilities.length : 0;
+    if(vulnCount>0){ scanStats.vulns+=vulnCount; scanStats.alerts++; log(`⚠ ${vulnCount} XSS vulnerabilities found`,'warn'); }
+    else { log('No XSS vulnerabilities detected','ok'); }
+    updateStats();
+  } catch(e){ setStatus('xss','error'); log('XSS scan error: '+e,'err'); }
+}
+
+// ── SQLi ──
+async function runSQLi(){
+  const url = document.getElementById('sqli-url').value.trim();
+  if(!url){ alert('Enter a URL.'); return; }
+  setStatus('sqli','running');
+  log(`SQLi scan started: ${url}`);
+  try {
+    const r = await fetch('/api/sqli-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+    const data = await r.json();
+    displayResult('sqli', data);
+    setStatus('sqli','idle');
+    scanStats.scans++;
+    const vulnCount = data.vulnerabilities ? data.vulnerabilities.length : 0;
+    if(vulnCount>0){ scanStats.vulns+=vulnCount; scanStats.alerts++; log(`⚠ ${vulnCount} SQLi vulnerabilities found`,'warn'); }
+    else { log('No SQL Injection vulnerabilities detected','ok'); }
+    updateStats();
+  } catch(e){ setStatus('sqli','error'); log('SQLi scan error: '+e,'err'); }
+}
+
+// ── MAPPER ──
+async function runMapper(){
+  const target = document.getElementById('mapper-target').value.trim();
+  if(!target){ alert('Enter a target.'); return; }
+  setStatus('mapper','running');
+  log(`Network mapping: ${target}`);
+  try {
+    const r = await fetch('/api/network-map',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target})});
+    const data = await r.json();
+    displayResult('mapper', data);
+    setStatus('mapper','idle');
+    scanStats.scans++;
+    updateStats();
+    log('Network mapping complete','ok');
+  } catch(e){ setStatus('mapper','error'); log('Mapping error: '+e,'err'); }
+}
+
+// ── SPIDER ──
+async function runSpider(){
+  const url   = document.getElementById('spider-url').value.trim();
+  const depth = document.getElementById('spider-depth').value;
+  if(!url){ alert('Enter a URL.'); return; }
+  setStatus('spider','running');
+  log(`Web spider started: ${url} (depth ${depth})`);
+  try {
+    const r = await fetch('/api/spider',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,depth:parseInt(depth)})});
+    const data = await r.json();
+    displayResult('spider', data);
+    setStatus('spider','idle');
+    scanStats.scans++;
+    updateStats();
+    if(data.urls) log(`Spider found ${data.urls.length} URLs`,'ok');
+  } catch(e){ setStatus('spider','error'); log('Spider error: '+e,'err'); }
+}
+
+// ── DNS ──
+async function runDNS(){
+  const domain = document.getElementById('dns-domain').value.trim();
+  if(!domain){ alert('Enter a domain.'); return; }
+  setStatus('dns','running');
+  log(`DNS lookup: ${domain}`);
+  try {
+    const r = await fetch('/api/dns-lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain})});
+    const data = await r.json();
+    displayResult('dns', data);
+    setStatus('dns','idle');
+    scanStats.scans++;
+    updateStats();
+    log(`DNS lookup complete for ${domain}`,'ok');
+  } catch(e){ setStatus('dns','error'); log('DNS error: '+e,'err'); }
+}
+
+// ── SSL ──
+async function runSSL(){
+  const hostname = document.getElementById('ssl-hostname').value.trim();
+  const port = parseInt(document.getElementById('ssl-port').value || '443');
+  if(!hostname){ alert('Enter a hostname.'); return; }
+  setStatus('ssl','running');
+  log(`SSL inspection: ${hostname}:${port}`);
+  try {
+    const r = await fetch('/api/ssl-inspect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hostname, port})});
+    const data = await r.json();
+    displayResult('ssl', data);
+    setStatus('ssl','idle');
+    scanStats.scans++;
+    updateStats();
+    log(`SSL inspection complete for ${hostname}`,'ok');
+  } catch(e){ setStatus('ssl','error'); log('SSL error: '+e,'err'); }
+}
+
+// ── PASSWORD ──
+async function runPassword(){
+  const password = document.getElementById('password-input').value;
+  if(!password){ alert('Enter a password to analyze.'); return; }
+  setStatus('password','running');
+  log('Password strength analysis...');
+  try {
+    const r = await fetch('/api/password-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});
+    const data = await r.json();
+    displayResult('password', data);
+    setStatus('password','idle');
+    scanStats.scans++;
+    updateStats();
+    log('Password analysis complete','ok');
+  } catch(e){ setStatus('password','error'); log('Password error: '+e,'err'); }
+}
+
+// ── SUBDOMAIN ──
+async function runSubdomain(){
+  const domain = document.getElementById('subdomain-domain').value.trim();
+  if(!domain){ alert('Enter a domain.'); return; }
+  setStatus('subdomain','running');
+  log(`Subdomain enumeration: ${domain}`);
+  try {
+    const r = await fetch('/api/subdomain-enum',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain})});
+    const data = await r.json();
+    displayResult('subdomain', data);
+    setStatus('subdomain','idle');
+    scanStats.scans++;
+    updateStats();
+    const found = data.found ? data.found.length : (data.subdomains ? data.subdomains.length : 0);
+    log(`Subdomain scan found ${found} subdomains`,'ok');
+  } catch(e){ setStatus('subdomain','error'); log('Subdomain error: '+e,'err'); }
+}
+
+// ── CVE ──
+async function runCVE(){
+  const query = document.getElementById('cve-query').value.trim();
+  const maxResults = parseInt(document.getElementById('cve-max').value || '10');
+  if(!query){ alert('Enter a search query.'); return; }
+  setStatus('cve','running');
+  log(`CVE search: ${query}`);
+  try {
+    const r = await fetch('/api/cve-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query, max_results:maxResults})});
+    const data = await r.json();
+    displayResult('cve', data);
+    setStatus('cve','idle');
+    scanStats.scans++;
+    updateStats();
+    const count = data.cves ? data.cves.length : 0;
+    log(`CVE search done: ${count} results`,'ok');
+  } catch(e){ setStatus('cve','error'); log('CVE error: '+e,'err'); }
+}
+
+// ── REVERSE SHELL ──
+async function runRevShell(){
+  const text = document.getElementById('revshell-text').value;
+  if(!text){ alert('Enter code or text to scan.'); return; }
+  setStatus('revshell','running');
+  log(`Reverse shell scan: ${text.split('\n').length} lines`);
+  try {
+    const r = await fetch('/api/revshell-detect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const data = await r.json();
+    displayResult('revshell', data);
+    setStatus('revshell','idle');
+    scanStats.scans++;
+    const matches = data.matches ? data.matches.length : 0;
+    if(matches>0){ scanStats.alerts++; log(`⚠ ${matches} shell signatures detected — risk: ${data.risk_label}`,'warn'); }
+    else { log('No reverse shell signatures detected','ok'); }
+    updateStats();
+  } catch(e){ setStatus('revshell','error'); log('Shell detect error: '+e,'err'); }
+}
+
+// ── SECURITY AUDIT ──
+async function runSecurityAudit(){
+  const url = document.getElementById('security-url').value.trim();
+  if(!url){ alert('Enter a URL.'); return; }
+  setStatus('security','running');
+  log(`Full security audit: ${url}`);
+  try {
+    const r = await fetch('/api/security-audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+    const data = await r.json();
+    displayResult('security', data);
+    setStatus('security','idle');
+    scanStats.scans++;
+    updateStats();
+    log(`Security audit complete for ${url}`,'ok');
+  } catch(e){ setStatus('security','error'); log('Security audit error: '+e,'err'); }
+}
+
+// ── AI ──
+async function runAI(){
+  const prompt  = document.getElementById('ai-prompt').value.trim();
+  const context = document.getElementById('ai-context').value.trim();
+  if(!prompt){ alert('Enter a prompt.'); return; }
+  const cfg = loadAIConfig();
+  if(!cfg.api_key && cfg.provider !== 'ollama'){ alert('Configure your API key in the BYOK section first.'); return; }
+  setStatus('ai','running');
+  log('AI analysis requested...');
+  try {
+    const r = await fetch('/api/ai-analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt, context, provider:cfg.provider, model:cfg.model, api_key:cfg.api_key, base_url:cfg.base_url})});
+    const data = await r.json();
+    document.getElementById('result-ai').textContent = data.response || data.error || JSON.stringify(data);
+    setStatus('ai','idle');
+    log('AI analysis complete','ok');
+  } catch(e){ setStatus('ai','error'); log('AI error: '+e,'err'); }
+}
+
+// ── BYOK ──
+const PROVIDER_MODELS = {
+  google: {model:'gemini-1.5-pro', base_url:''},
+  openai: {model:'gpt-4o', base_url:'https://api.openai.com/v1'},
+  anthropic: {model:'claude-3-5-sonnet-20241022', base_url:''},
+  mistral: {model:'mistral-large-latest', base_url:'https://api.mistral.ai/v1'},
+  groq: {model:'llama-3.3-70b-versatile', base_url:'https://api.groq.com/openai/v1'},
+  ollama: {model:'llama3', base_url:'http://localhost:11434'},
+  custom: {model:'', base_url:''},
+};
+
+function updateProviderDefaults(){
+  const p = document.getElementById('ai-provider').value;
+  const defaults = PROVIDER_MODELS[p] || {};
+  if(defaults.model) document.getElementById('ai-model').value = defaults.model;
+  if(defaults.base_url !== undefined) document.getElementById('ai-base-url').value = defaults.base_url;
+}
+
+function saveAIConfig(){
+  const cfg = {
+    provider: document.getElementById('ai-provider').value,
+    model:    document.getElementById('ai-model').value,
+    base_url: document.getElementById('ai-base-url').value,
+    api_key:  document.getElementById('ai-api-key').value,
+  };
+  localStorage.setItem('azw_ai_config', JSON.stringify(cfg));
+  const status = document.getElementById('key-status');
+  if(cfg.api_key){
+    status.className = 'key-status ok-status';
+    status.textContent = '✓ API key saved — AI assistant ready';
+  } else {
+    status.className = 'key-status';
+    status.textContent = '🔑 No key configured — AI assistant features disabled';
+  }
+  log(`AI config saved: ${cfg.provider} / ${cfg.model}`,'ok');
+}
+
+function loadAIConfig(){
+  try { return JSON.parse(localStorage.getItem('azw_ai_config') || '{}'); }
+  catch{ return {}; }
+}
+
+function toggleKeyVisibility(){
+  const f = document.getElementById('ai-api-key');
+  f.type = f.type === 'password' ? 'text' : 'password';
+}
+
+function clearAPIKey(){
+  document.getElementById('ai-api-key').value = '';
+  saveAIConfig();
+}
+
+async function testAIConnection(){
+  const cfg = loadAIConfig();
+  if(!cfg.api_key && cfg.provider !== 'ollama'){
+    alert('Save an API key first.');
+    return;
+  }
+  log('Testing AI connection...','info');
+  try {
+    const r = await fetch('/api/ai-test',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({provider:cfg.provider, model:cfg.model, api_key:cfg.api_key, base_url:cfg.base_url})});
+    const data = await r.json();
+    if(data.ok){ log('AI connection test passed ✓','ok'); }
+    else { log('AI connection failed: '+data.error,'err'); }
+  } catch(e){ log('Connection test error: '+e,'err'); }
+}
+
+// Load saved config on page load
+(function initConfig(){
+  const cfg = loadAIConfig();
+  if(cfg.provider) document.getElementById('ai-provider').value = cfg.provider;
+  if(cfg.model) document.getElementById('ai-model').value = cfg.model;
+  if(cfg.base_url) document.getElementById('ai-base-url').value = cfg.base_url;
+  if(cfg.api_key){
+    document.getElementById('ai-api-key').value = cfg.api_key;
+    const s = document.getElementById('key-status');
+    s.className = 'key-status ok-status';
+    s.textContent = '✓ API key loaded from saved config';
+  }
+})();
+</script>
+
+</body>
+</html>

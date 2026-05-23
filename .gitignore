@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Secrets / config (never commit real API keys)
+adizen_config.json
+config.json
+
+# Scan reports (generated at runtime)
+reports/
+AdiZenWorks_Reports/
+*.json
+
+# Development artifacts
+*.txt
+*.ps1
+desktop_main_complete.py
+FINAL*.md
+WEB_APP_READY.md

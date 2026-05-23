@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdiZenWorks Cybersecurity Toolkit - Web Edition</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">🛡️</div>
+                    <div class="logo-text">
+                        <h1>AdiZenWorks</h1>
+                        <p>Cybersecurity Toolkit</p>
+                    </div>
+                </div>
+                <div class="header-tagline">
+                    <span>Securing Your Digital Future | AdiZenWorks Inc</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Tools Grid -->
+            <div class="tools-grid">
+                <!-- Port Scanner -->
+                <div class="tool-card" data-tool="ports">
+                    <div class="tool-icon">🔍</div>
+                    <h3>Port Scanner</h3>
+                    <p>Network port reconnaissance</p>
+                    <button class="btn-scan" onclick="openTool('ports')">Launch</button>
+                </div>
+
+                <!-- Security Auditor -->
+                <div class="tool-card" data-tool="security">
+                    <div class="tool-icon">🔒</div>
+                    <h3>Security Auditor</h3>
+                    <p>HTTP security headers analysis</p>
+                    <button class="btn-scan" onclick="openTool('security')">Launch</button>
+                </div>
+
+                <!-- Web Spider -->
+                <div class="tool-card" data-tool="spider">
+                    <div class="tool-icon">🕷️</div>
+                    <h3>Web Spider</h3>
+                    <p>Website crawling & mapping</p>
+                    <button class="btn-scan" onclick="openTool('spider')">Launch</button>
+                </div>
+
+                <!-- SQL Injection -->
+                <div class="tool-card" data-tool="sqli">
+                    <div class="tool-icon">💉</div>
+                    <h3>SQL Injection</h3>
+                    <p>SQL vulnerability testing</p>
+                    <button class="btn-scan" onclick="openTool('sqli')">Launch</button>
+                </div>
+
+                <!-- XSS Scanner -->
+                <div class="tool-card" data-tool="xss">
+                    <div class="tool-icon">⚡</div>
+                    <h3>XSS Scanner</h3>
+                    <p>Cross-site scripting detection</p>
+                    <button class="btn-scan" onclick="openTool('xss')">Launch</button>
+                </div>
+
+                <!-- Network Mapper -->
+                <div class="tool-card" data-tool="network">
+                    <div class="tool-icon">🗺️</div>
+                    <h3>Network Mapper</h3>
+                    <p>Subnet scanning & discovery</p>
+                    <button class="btn-scan" onclick="openTool('network')">Launch</button>
+                </div>
+
+                <!-- Hash Generator -->
+                <div class="tool-card" data-tool="hash">
+                    <div class="tool-icon">🔐</div>
+                    <h3>Hash Generator</h3>
+                    <p>Cryptographic hash generation</p>
+                    <button class="btn-scan" onclick="openTool('hash')">Launch</button>
+                </div>
+
+                <!-- Header Inspector -->
+                <div class="tool-card" data-tool="headers">
+                    <div class="tool-icon">📋</div>
+                    <h3>Header Inspector</h3>
+                    <p>HTTP header analysis</p>
+                    <button class="btn-scan" onclick="openTool('headers')">Launch</button>
+                </div>
+
+                <!-- AI Assistant -->
+                <div class="tool-card" data-tool="ai">
+                    <div class="tool-icon">🤖</div>
+                    <h3>AI Assistant</h3>
+                    <p>Gemini-powered analysis</p>
+                    <button class="btn-scan" onclick="openTool('ai')">Launch</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tool Modal -->
+    <div id="toolModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tool</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="toolForm"></div>
+                <div id="toolResults" class="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AdiZenWorks Inc. | Hexagon Tech | Version 2.0 Web</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
