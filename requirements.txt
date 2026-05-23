@@ -1,0 +1,8 @@
+pytest==7.4.0
+pytest-cov==4.1.0
+colorama>=0.4
+iniconfig>=1.0.1
+packaging>=22
+pluggy<2,>=1.5
+pygments>=2.7.2
+coverage>=7.10.6
